@@ -14,10 +14,9 @@ pub struct VM{
 }
 
 impl VM{
-	pub fn say_hello(&self){println!("Works fine...");}
 
 	pub fn new()->VM{
-		let mem_allot = vec![0,512]; //create a stack of size 512 i32
+		let mem_allot = vec![0;512]; //create a stack of size 512 i32
 		VM{memory:mem_allot, pc:100,sp:0,typ:0,dat:0,running:true }	
 	}
 
@@ -34,8 +33,10 @@ impl VM{
 
 	pub fn load_program(&mut self,prog:&Vec<i32>){
 		println!("Loading program...");
+		let mut loc = 0;
 		for i in prog{
-			self.memory.push(*i);
+			self.memory.insert(self.pc+loc,*i);
+			loc+=1;
 		}
 		println!("Memory content : {:?}",self.memory);
 	
