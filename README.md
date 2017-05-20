@@ -7,17 +7,18 @@ VM executes postfix expression compiled into VM instruction format
 ## 32 bit instructions
 where first 2 bit defines type as follows
 
-`00 => +ve number
+'''
+ 00 => +ve number
  01 => primitive operation
  10 => -ve operation
- 11 => undefined`
+ 11 => undefined'''
 
-##Example
+## Example
 ------------------------------------------------------------
  `0xD			+13`
  `0x8000000D       	-13`
 
-##VM instruction
+## VM instruction
 -----------------------------------------------------------
  `0x40000001		ADD`           
  `0x40000010		SUB`           
