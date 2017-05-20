@@ -15,13 +15,32 @@ pub struct VM{
 
 impl VM{
 
+	/* Initialize virtual machine
+	 *Setup stack pointer , PC
+	 */
 	pub fn new()->VM{
-		let mem_allot = vec![0;512]; //create a stack of size 512 i32
-		VM{memory:mem_allot, pc:100,sp:0,typ:0,dat:0,running:true }	
+		let mem_allot = vec![0;64]; //create a stack of size 512 i32
+		VM{memory:mem_allot, pc:31,sp:0,typ:0,dat:0,running:true }	
 	}
 
+	
+	/*load the program to virtual machine memory from
+	 * the instruction vector
+	 */
+	pub fn load_program(&mut self,prog:&Vec<i32>){
+		println!("Loading program...");
+		let mut loc = 1;
+		for i in prog{
+			self.memory.insert(self.pc+loc,*i);
+			loc+=1;
+		}
+//		println!("Memory content : {:?}",self.memory);
+	
+	}
+
+	/*main thread which executes VM modules
+	 */
 	pub fn run(&mut self) {
-		self.pc-=1; //initial fetch will load program counter to appropriate address
 		println!("Executing instructions...");
 		while self.running {
 			self.fetch();
@@ -31,49 +50,91 @@ impl VM{
 		println!(" \nExecution completed");
 	}
 
-	pub fn load_program(&mut self,prog:&Vec<i32>){
-		println!("Loading program...");
-		let mut loc = 0;
-		for i in prog{
-			self.memory.insert(self.pc+loc,*i);
-			loc+=1;
-		}
-		println!("Memory content : {:?}",self.memory);
-	
-	}
-
 
 	fn get_type(&self, instruction:i32)->i32{
-		(instruction& 0xc0000000)>>30 //2 msb	
+		(instruction & 0xC0000000)>>30//2 msb	
+		
 	}
 	fn get_data(&self, instruction:i32)->i32{
 		instruction & 0x3fffffff
-	}
+		}
 
 	fn fetch(&mut self){
-		self.pc+=1;	
+		if self.pc < 63 {
+			self.pc+=1;	
+		}else{
+			panic!("Incomplete code execution, memory boudary reached without reading HALT instruction");
+		}
 	}
 	fn decode(&mut self){
-		self.dat = self.get_data(self.memory[self.pc]);
-		self.typ = self.get_type(self.memory[self.pc]);
+		let i = self.pc;
+		self.dat = self.get_data(self.memory[i]);
+		self.typ = self.get_type(self.memory[i]);
+//		println!("{:?}",self.memory);
 	}
+
+
 		
 	fn exec(&mut self){
-		println!(" TOS now : {}",self.memory[self.sp-1]);
 		if self.typ == 0 || self.typ == 2 {
-		/* the data is a operand
-		 * push on to the stack 
-		 */
-		 self.memory.insert(self.sp,self.dat);
-		 self.sp+=1;
+			/* the data is a operand
+			 * push on to the stack 
+			 */
+			 self.memory[self.sp]=self.dat;
+			 self.sp+=1;
 		 }else{
 		 	self.do_primitive();
 		 }
 	}
+
 	fn do_primitive(&mut self){
-		println!("Doing primitive ops");
-		self.memory.remove(self.sp-1);
-		self.memory.remove(self.sp-1);
+		
+		
+		match self.dat {
+			0 =>{
+				println!("[ HAL:exec ]: finished executing instriction ");
+				self.running = false;
+				return;
+			},
+			1 =>{
+				let top_1 = self.memory[self.sp-1];
+				let top_2 = self.memory[self.sp-2];
+				println!("[ ADD ] : {} {} ",top_1,top_2);
+				self.memory[self.sp-2] = top_1 + top_2;
+				self.sp-=1;
+			},
+			2 =>{
+				let top_1 = self.memory[self.sp-1];
+				let top_2 = self.memory[self.sp-2];
+				println!("[ SUB ] : {} {} ",top_1,top_2);
+				self.memory[self.sp-2] = top_1 - top_2;
+				self.sp-=1;
+			
+			},
+			3 => {
+				let top_1 = self.memory[self.sp-1];
+				let top_2 = self.memory[self.sp-2];
+				println!("[ MULT ] : {} {} ",top_1,top_2);
+				self.memory[self.sp-2] =top_1 * top_2;
+				self.sp-=1;
+			
+			},
+			4 => {
+				let top_1 = self.memory[self.sp-1];
+				let top_2 = self.memory[self.sp-2];
+				
+				println!("[ DIV ] : {} {} ",top_1,top_2);
+				self.memory[self.sp-2]  = top_1 / top_2;
+				self.sp-=1;
+			},
+			_ => {
+				panic!("[ exec ] : Undefined instruction ");
+			},
+		
+		}
+		
+		println!(" TOS now : {}",self.memory[self.sp-1]);
+		
 			
 	}
 }

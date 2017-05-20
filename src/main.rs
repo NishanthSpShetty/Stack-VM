@@ -1,4 +1,8 @@
+extern crate byteorder;
+
 mod lib;
+
+use byteorder::{ByteOrder,LittleEndian};
 use lib::stack;
 
 use std::io;
@@ -14,7 +18,6 @@ fn main() {
 		return();
 	}
 	
-	//println!(" {:?}",argv);
 	
 	let mut file = File::open(argv[1].clone()).unwrap();
 
@@ -24,8 +27,11 @@ fn main() {
 	let mut l=0;
 	while l <len {
 		file.read_exact(&mut buf).unwrap();
-		let int = (buf.iter().rev().fold(0,|acc,&b|(acc<<1)+b as u32)) as i32;
-		println!(" {:b}",int );
+//		println!(" {:?}",buf.iter().rev());
+//		let int = (buf.iter().rev().fold(0,|acc,&b|(acc<<1)+b as u32)) as i32;
+		
+		let int = LittleEndian::read_i32(&buf[..]);
+//		println!(" {:b}",int );
 		program.push(int);
 //		println!(" {:?}",program);
 		l+=4;
