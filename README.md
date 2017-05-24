@@ -28,5 +28,5 @@ where first 2 bit defines type as follows
 
 
 -------------------------------------------------------------
-use [stack-langc](github.com/NishanthSpShetty/stack-langc) generate the instruction. 
+use [stack-langc](https://github.com/NishanthSpShetty/stack-langc) generate the instruction. 
 
