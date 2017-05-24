@@ -22,9 +22,12 @@ where first 2 bit defines type as follows
 -----------------------------------------------------------
  `0x40000001		ADD`           
  `0x40000010		SUB`           
- `0x40000011	    	MUL`           
- `0x40000100	    	DIV`           
+ `0x40000011	   	MUL`           
+ `0x40000100	   	DIV`           
  `0x40000000		HALT`
 
- 
+
+-------------------------------------------------------------
+Use Stack-langc compiler to generate the instructions.
+You can find the stack-langc at github.com/NishanthSpShetty/stack-langc
 

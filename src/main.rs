@@ -5,7 +5,6 @@ mod lib;
 use byteorder::{ByteOrder,LittleEndian};
 use lib::stack;
 
-use std::io;
 use std::io::prelude::*;
 use std::fs::File;
 fn main() {
@@ -36,6 +35,7 @@ fn main() {
 //		println!(" {:?}",program);
 		l+=4;
 	}
+
 
 	vm.load_program(&program);
 	vm.run();

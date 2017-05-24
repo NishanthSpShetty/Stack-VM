@@ -3,6 +3,7 @@
  * Operations on it.
  */
 
+
 pub struct VM{
 	//stack registers;
 	pc:usize,//program counter
@@ -92,7 +93,7 @@ impl VM{
 		
 		match self.dat {
 			0 =>{
-				println!("[ HAL:exec ]: finished executing instriction ");
+				println!("[ HAL:exec ]");
 				self.running = false;
 				return;
 			},
