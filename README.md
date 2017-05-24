@@ -28,6 +28,5 @@ where first 2 bit defines type as follows
 
 
 -------------------------------------------------------------
-Use Stack-langc compiler to generate the instructions.
-You can find the stack-langc at github.com/NishanthSpShetty/stack-langc
+use [stack-langc](github.com/NishanthSpShetty/stack-langc) generate the instruction. 
 
