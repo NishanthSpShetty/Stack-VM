@@ -2,7 +2,9 @@
  * This module defines stack and various
  * Operations on it.
  */
-
+macro_rules! debug {
+    ($($p:tt)*) => (if cfg!(debug_assertions) { println!($($p)*) } else { () })
+}
 
 pub struct VM{
 	//stack registers;
@@ -29,26 +31,26 @@ impl VM{
 	 * the instruction vector
 	 */
 	pub fn load_program(&mut self,prog:&Vec<i32>){
-		println!("Loading program...");
+		debug!("Loading program...");
 		let mut loc = 1;
 		for i in prog{
 			self.memory.insert(self.pc+loc,*i);
 			loc+=1;
 		}
-//		println!("Memory content : {:?}",self.memory);
+//		debug!("Memory content : {:?}",self.memory);
 	
 	}
 
 	/*main thread which executes VM modules
 	 */
 	pub fn run(&mut self) {
-		println!("Executing instructions...");
+		debug!("Executing instructions...");
 		while self.running {
 			self.fetch();
 			self.decode();
 			self.exec();
 		}
-		println!(" \nExecution completed");
+		debug!(" \nExecution completed");
 	}
 
 
@@ -71,7 +73,7 @@ impl VM{
 		let i = self.pc;
 		self.dat = self.get_data(self.memory[i]);
 		self.typ = self.get_type(self.memory[i]);
-//		println!("{:?}",self.memory);
+//		debug!("{:?}",self.memory);
 	}
 
 
@@ -93,21 +95,21 @@ impl VM{
 		
 		match self.dat {
 			0 =>{
-				println!("[ HAL:exec ]");
+				debug!("[ HAL:exec ]");
 				self.running = false;
 				return;
 			},
 			1 =>{
 				let top_1 = self.memory[self.sp-1];
 				let top_2 = self.memory[self.sp-2];
-				println!("[ ADD ] : {} {} ",top_1,top_2);
+				debug!("[ ADD ] : {} {} ",top_1,top_2);
 				self.memory[self.sp-2] = top_1 + top_2;
 				self.sp-=1;
 			},
 			2 =>{
 				let top_1 = self.memory[self.sp-1];
 				let top_2 = self.memory[self.sp-2];
-				println!("[ SUB ] : {} {} ",top_1,top_2);
+				debug!("[ SUB ] : {} {} ",top_1,top_2);
 				self.memory[self.sp-2] = top_1 - top_2;
 				self.sp-=1;
 			
@@ -115,7 +117,7 @@ impl VM{
 			3 => {
 				let top_1 = self.memory[self.sp-1];
 				let top_2 = self.memory[self.sp-2];
-				println!("[ MULT ] : {} {} ",top_1,top_2);
+				debug!("[ MULT ] : {} {} ",top_1,top_2);
 				self.memory[self.sp-2] =top_1 * top_2;
 				self.sp-=1;
 			
@@ -124,7 +126,7 @@ impl VM{
 				let top_1 = self.memory[self.sp-1];
 				let top_2 = self.memory[self.sp-2];
 				
-				println!("[ DIV ] : {} {} ",top_1,top_2);
+				debug!("[ DIV ] : {} {} ",top_1,top_2);
 				self.memory[self.sp-2]  = top_1 / top_2;
 				self.sp-=1;
 			},
@@ -134,7 +136,7 @@ impl VM{
 		
 		}
 		
-		println!(" TOS now : {}",self.memory[self.sp-1]);
+		debug!(" TOS now : {}",self.memory[self.sp-1]);
 		
 			
 	}
