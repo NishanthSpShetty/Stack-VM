@@ -55,7 +55,7 @@ impl VM{
 
 
 	fn get_type(&self, instruction:i32)->i32{
-		(instruction & 0xC0000000)>>30//2 msb	
+		(instruction & 0xC0000000_u32 as i32)>>30//2 msb	
 		
 	}
 	fn get_data(&self, instruction:i32)->i32{
