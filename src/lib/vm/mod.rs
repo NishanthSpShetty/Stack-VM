@@ -52,12 +52,13 @@ impl VM {
         for instruction in instructions {
             self.program_memory.push(*instruction);
         }
-        debug!("Memory content : {:?}", self.program_memory);
     }
 
     /*main thread which executes VM modules
      */
     pub fn run(&mut self) {
+        debug!("Memory content : {:?}", self.program_memory);
+
         debug!("Executing instructions...");
         self.set_running(true);
         while self.is_running() {
@@ -69,11 +70,11 @@ impl VM {
     }
 
 
-    fn get_type(&self, instruction: u32) -> u8 {
+    fn get_type(instruction: u32) -> u8 {
         ((instruction & 0xC0000000_u32) >> 30) as u8//2 msb
     }
-    fn get_data(&self, instruction: u32) -> i32 {
-        (instruction as i32 & 0x3fffffff)
+    fn get_data(instruction: u32) -> i32 {
+        (instruction & 0xffffffff) as i32
     }
 
     fn fetch(&mut self) {
@@ -86,15 +87,14 @@ impl VM {
     }
     fn decode(&mut self) {
         let word = self.program_memory[self.pc];
-        self.data = self.get_data(word);
-        self.type_info = self.get_type(word);
+        self.data = VM::get_data(word);
+        self.type_info = VM::get_type(word);
     }
 
 
     fn exec(&mut self) {
         if self.current_instruction_type() == CODE_TYPE_DATA_POSITIVE || self.current_instruction_type() == CODE_TYPE_DATA_NEGATIVE {
             debug!("Instruction type Data ({} = {} ) ", self.current_instruction_type(), self.current_data());
-
             self.stack.push(self.data);
         } else {
             //execute instruction
@@ -104,7 +104,7 @@ impl VM {
     }
 
     fn do_primitive(&mut self) {
-        match self.current_data() {
+        match self.current_data() & 0xCfffff {
             0 => {
                 debug!("[ HALT ] : Stopping VM ");
                 self.set_running(false);
@@ -147,16 +147,22 @@ impl VM {
 
 #[cfg(test)]
 mod test_vm {
-    use lib::vm;
-    use super::debug;
+    use lib::{vm, vm::VM};
 
     #[test]
     fn test_get_type() {
-        let mut vm = vm::VM::new(10);
-        assert_eq!(0, vm.get_type(0x0));
-        assert_eq!(vm::CODE_TYPE_INSTRUCTION, vm.get_type(1073741825));
-        assert_eq!(vm::CODE_TYPE_DATA_POSITIVE, vm.get_type(22));
+        assert_eq!(0, VM::get_type(0x0));
+        assert_eq!(vm::CODE_TYPE_INSTRUCTION, VM::get_type(1073741825));
+        assert_eq!(vm::CODE_TYPE_DATA_POSITIVE, VM::get_type(22));
         let neg = -100;
-        assert_eq!(vm::CODE_TYPE_DATA_NEGATIVE, vm.get_type(neg as u32));
+        assert_eq!(vm::CODE_TYPE_DATA_NEGATIVE, VM::get_type(neg as u32));
+    }
+
+    #[test]
+    fn test_get_data() {
+        assert_eq!(0, VM::get_data(0));
+        assert_eq!(1, VM::get_data(1));
+        let num = -1;
+        assert_eq!(-1, VM::get_data(num as u32));
     }
 }

@@ -32,11 +32,8 @@ fn main() {
 
     while l < len {
         file.read_exact(&mut buf).unwrap();
-
         let int = LittleEndian::read_u32(&buf[..]);
-
         program.push(int);
-        debug!(" {:?}", program);
         l += 4;
     }
 

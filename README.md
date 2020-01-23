@@ -37,6 +37,12 @@ VM Byte code can be generated from the `stack-langc` [compiler](https://github.c
 
 
 ## Run
+
+#### Run test
+    cargo run test
+
+#### Run VM
+
 This repo contains file `a.out` with VM instruction to add two numbers, you can dump hex content to view the data.
 Byteorder is in little endian, I'll explain the word stored in the file.
 
@@ -47,9 +53,10 @@ Hex word | VM Value |
 |0x40000001| OI (ADD)|
 |0x40000000| OI (HALT)|
 
+
+
 Run the above program.
 
     cargo run a.out
     
 In debug mode you can see the result 54 at the top of the stack.
-
