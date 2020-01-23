@@ -24,7 +24,7 @@ First 2 bits distinguishes between data and instruction.
 | 11 | undefined|
 
 ## VM operation instruction (OI)
------------------------------------------------------------
+----------------------------------------
     0x40000001		ADD           
     0x40000010		SUB           
     0x40000011	   	MUL           

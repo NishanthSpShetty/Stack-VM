@@ -1,5 +1,6 @@
 pub mod stack;
 
+pub mod vm;
 
 #[macro_export]
 macro_rules! debug {

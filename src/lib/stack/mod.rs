@@ -1,131 +1,66 @@
-/* Stack Virtual Machine
- * This module defines stack and various
- * Operations on it.
- */
-
-use ::debug;
-
-pub struct VM {
-    //stack registers;
-    pc: usize,
-    //program counter
-    sp: usize,
-    //stack pointer
-    typ: i32,
-    //typ of value read
-    dat: i32,
-    //data
-    running: bool,
-    memory: Vec<i32>,
+pub struct VMStack {
+    internal_stack: Vec<i32>,
+    capacity: usize,
+    top: usize, //also size
 }
 
-impl VM {
-    /* Initialize virtual machine
-     *Setup stack pointer , PC
-     */
-    pub fn new(stack_size : usize) -> VM {
-        let mem_allot = vec![0; stack_size];
-        VM { memory: mem_allot, pc: 31, sp: 0, typ: 0, dat: 0, running: true }
+impl VMStack {
+    pub fn new(stack_size: usize) -> VMStack {
+        VMStack { capacity: stack_size, top: 0, internal_stack: Vec::with_capacity(stack_size) }
     }
 
-
-    /* load the program to virtual machine memory from
-     * the instruction vector
-     */
-    pub fn load_program(&mut self, prog: &Vec<i32>) {
-        debug!("Loading program...");
-        let mut loc = 1;
-        for i in prog {
-            self.memory.insert(self.pc + loc, *i);
-            loc += 1;
+    pub fn push(&mut self, data: i32) {
+        if self.top == self.capacity {
+            panic!("Stack overflow Capacity {} , Size {} ", self.capacity, self.top)
         }
-        debug!("Memory content : {:?}", self.memory);
+        self.internal_stack.push(data);
+        self.top += 1;
     }
 
-    /*main thread which executes VM modules
-     */
-    pub fn run(&mut self) {
-        debug!("Executing instructions...");
-        while self.running {
-            self.fetch();
-            self.decode();
-            self.exec();
+    pub fn pop(&mut self) -> i32 {
+        if self.top == 0 {
+            panic!("Stack underflow")
         }
-        debug!(" \nExecution completed");
+        self.top -= 1;
+        self.internal_stack.pop().unwrap()
     }
 
+    pub fn peek(&self) -> i32 { *self.internal_stack.last().unwrap() }
+}
 
-    fn get_type(&self, instruction: i32) -> i32 {
-        (instruction & 0xC0000000_u32 as i32) >> 30//2 msb
-    }
-    fn get_data(&self, instruction: i32) -> i32 {
-        instruction & 0x3fffffff
-    }
 
-    fn fetch(&mut self) {
-        if self.pc < 63 {
-            self.pc += 1;
-        } else {
-            panic!("Incomplete code execution, memory boundary reached without reading HALT instruction");
-        }
-    }
-    fn decode(&mut self) {
-        let i = self.pc;
-        self.dat = self.get_data(self.memory[i]);
-        self.typ = self.get_type(self.memory[i]);
-        debug!("{:?}", self.memory);
+#[cfg(test)]
+mod test_vmstack {
+    use lib::stack::VMStack;
+
+    #[test]
+    fn test_vm_stack_push_pop() {
+        let mut stack = VMStack::new(1);
+        stack.push(10);
+
+        assert_eq!(10, stack.peek());
+        assert_eq!(10, stack.pop());
     }
 
-
-    fn exec(&mut self) {
-        if self.typ == 0 || self.typ == 2 {
-            self.memory[self.sp] = self.dat;
-            self.sp += 1;
-        } else {
-            self.do_primitive();
-        }
+    #[test]
+    #[should_panic]
+    fn test_peek_when_empty_expect_panic() {
+        let stack = VMStack::new(1);
+        assert_eq!(10, stack.peek());
     }
 
-    fn do_primitive(&mut self) {
-        match self.dat {
-            0 => {
-                debug!("[ HAL: Stopping VM ]");
-                self.running = false;
-            }
-            1 => {
-                let top_1 = self.memory[self.sp - 1];
-                let top_2 = self.memory[self.sp - 2];
-                debug!("[ ADD ] : {} {} ", top_1, top_2);
-                self.memory[self.sp - 2] = top_1 + top_2;
-                self.sp -= 1;
-            }
-            2 => {
-                let top_1 = self.memory[self.sp - 1];
-                let top_2 = self.memory[self.sp - 2];
-                debug!("[ SUB ] : {} {} ", top_1, top_2);
-                self.memory[self.sp - 2] = top_1 - top_2;
-                self.sp -= 1;
-            }
-            3 => {
-                let top_1 = self.memory[self.sp - 1];
-                let top_2 = self.memory[self.sp - 2];
-                debug!("[ MULT ] : {} {} ", top_1, top_2);
-                self.memory[self.sp - 2] = top_1 * top_2;
-                self.sp -= 1;
-            }
-            4 => {
-                let top_1 = self.memory[self.sp - 1];
-                let top_2 = self.memory[self.sp - 2];
+    #[test]
+    #[should_panic]
+    fn test_push_when_full_expect_overflow() {
+        let mut stack = VMStack::new(1);
+        stack.push(1);
+        stack.push(2);
+    }
 
-                debug!("[ DIV ] : {} {} ", top_1, top_2);
-                self.memory[self.sp - 2] = top_1 / top_2;
-                self.sp -= 1;
-            }
-            _ => {
-                panic!("[ exec ] : Undefined instruction ");
-            }
-        }
-
-        debug!(" TOS now : {}", self.memory[self.sp - 1]);
+    #[test]
+    #[should_panic]
+    fn test_pop_when_empty_epect_underflow(){
+        let mut stack = VMStack::new(1);
+        assert_eq!(10, stack.pop());
     }
 }
